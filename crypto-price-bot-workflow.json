@@ -1,0 +1,461 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        176,
+        208
+      ],
+      "id": "9ec6baf2-efff-4dd6-9618-4bd73cac3423",
+      "name": "Telegram Trigger"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.choices[0].message.content }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3008,
+        240
+      ],
+      "id": "4c0b0902-2350-4fee-9fe1-594b96ae785c",
+      "name": "Send a text message"
+    },
+    {
+      "parameters": {
+        "documentId": "YOUR_GOOGLE_SHEET_ID_HERE",
+        "sheetName": "Sheet1",
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "UserID",
+              "lookupValue": "={{ $json.message.chat.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        400,
+        208
+      ],
+      "id": "665f0166-eaf2-4433-a134-2945637c45af",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cb4bf3c8-0514-496c-87ff-c9e84be1440b",
+              "leftValue": "={{ $json.UserID }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        208
+      ],
+      "id": "7ac4d7a5-837e-4e46-b3d1-6ba801580971",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ee50097c-a0e3-4a30-8ee1-dbfc93c204e8",
+              "leftValue": "={{ $json.MessageCount }}",
+              "rightValue": 2,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1072,
+        208
+      ],
+      "id": "7739262d-4c95-473c-a91b-8da9f3a87de1",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "You sent more than 3 Messages today, Come back tomorrow!",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1296,
+        112
+      ],
+      "id": "73a2c85d-debf-4f8c-9213-1c0ab3ce079e",
+      "name": "Send a text message1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a057ede9-7b4c-4622-91bd-9291f5b55542",
+              "leftValue": "={{ $json.Date }}",
+              "rightValue": "={{ $today }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        848,
+        304
+      ],
+      "id": "2589261c-445a-40ca-b798-d2ff0bcd8210",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": "YOUR_GOOGLE_SHEET_ID_HERE",
+        "sheetName": "Sheet1",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "UserID": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+            "MessageCount": "1",
+            "Date": "={{ $today }}"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1296,
+        -80
+      ],
+      "id": "71f84815-3cc2-461c-a2f9-4983cfeafef0",
+      "name": "Append row in sheet"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": "YOUR_GOOGLE_SHEET_ID_HERE",
+        "sheetName": "Sheet1",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "UserID": "={{ $json.UserID }}",
+            "MessageCount": "1",
+            "Date": "={{ $today }}"
+          },
+          "matchingColumns": [
+            "UserID"
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1296,
+        496
+      ],
+      "id": "1375247c-0750-4cdb-a4fc-6fd76abba4da",
+      "name": "Append or update row in sheet"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": "YOUR_GOOGLE_SHEET_ID_HERE",
+        "sheetName": "Sheet1",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "UserID": "={{ $json.UserID }}",
+            "Date": "={{ $today }}",
+            "MessageCount": "={{ $json.MessageCount +1}}"
+          },
+          "matchingColumns": [
+            "UserID"
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1296,
+        304
+      ],
+      "id": "9cdbe929-ea7b-4178-b058-9d45766fd7b8",
+      "name": "Append or update row in sheet1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.fireworks.ai/inference/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"accounts/sentientfoundation-serverless/models/dobby-mini-unhinged-plus-llama-3-1-8b\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"={{ `CRITICAL: You MUST return ONLY valid JSON. No explanations, no markdown, or extra text.\\\\n\\\\nUse this date reference list to resolve relative dates. Today is ${$today.toFormat('yyyy-MM-dd')}.\\\\n- 'yesterday' was: ${$today.minus({ days: 1 }).toFormat('yyyy-MM-dd')}\\\\n- 'the day before yesterday' was: ${$today.minus({ days: 2 }).toFormat('yyyy-MM-dd')}\\\\n\\\\nWhen a user says 'yesterday', you MUST use the date provided for 'yesterday'. Do not calculate it yourself.\\\\n\\\\nYour task is to extract the cryptocurrency name or symbol, and any specified date, from the user's message. Return ONLY the JSON object.\\\\n\\\\nRules:\\\\n1. If you find a coin and a date: {\\\\\\\"coin\\\\\\\": \\\\\\\"Bitcoin\\\\\\\", \\\\\\\"date\\\\\\\": \\\\\\\"2024-01-12\\\\\\\", \\\\\\\"originalMessage\\\\\\\": \\\\\\\"What was the price of Bitcoin on 12 Jan 2024?\\\\\\\"}\\\\n2. If you only find a coin: {\\\\\\\"coin\\\\\\\": \\\\\\\"ETH\\\\\\\", \\\\\\\"originalMessage\\\\\\\": \\\\\\\"ETH price today\\\\\\\"}\\\\n3. If no coin is mentioned: {\\\\\\\"error\\\\\\\": \\\\\\\"No cryptocurrency name or symbol provided\\\\\\\", \\\\\\\"originalMessage\\\\\\\": \\\\\\\"Price?\\\\\\\"}\\\\n4. If the query is unclear: {\\\\\\\"error\\\\\\\": \\\\\\\"Invalid query format\\\\\\\", \\\\\\\"originalMessage\\\\\\\": \\\\\\\"What?\\\\\\\"}\\\\n\\\\nEnsure the date format is YYYY-MM-DD.\\\\n\\\\nRETURN ONLY THE JSON OBJECT.` }}\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify($('Telegram Trigger').item.json.message.text) }}\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2144,
+        240
+      ],
+      "id": "86a4d08c-02ee-40cc-af4e-a73032c13196",
+      "name": "HTTP Request1",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// This code is designed for an n8n \"Code\" node.\n\n// --- ACTION REQUIRED ---\n// Paste your working CoinGecko API Key in the line below.\nconst COINGECKO_API_KEY = 'YOUR_COINGECKO_API_KEY_HERE';\n// --- END OF ACTION ---\n\n\n// Get the AI's response content\nconst aiContentString = $input.first().json.choices[0].message.content;\n\n// --- Resilient JSON Parsing ---\nlet parsedContent;\ntry {\n  const startIndex = aiContentString.indexOf('{');\n  const endIndex = aiContentString.lastIndexOf('}');\n  if (startIndex === -1 || endIndex === -1) throw new Error(\"AI response did not contain a valid JSON object.\");\n  const jsonString = aiContentString.substring(startIndex, endIndex + 1);\n  parsedContent = JSON.parse(jsonString);\n} catch (error) {\n  return [{ json: { error: \"Failed to parse the AI response.\", details: error.message, originalAIResponse: aiContentString } }];\n}\n\nif (parsedContent.error) {\n  return [{ json: { error: parsedContent.error, originalMessage: parsedContent.originalMessage } }];\n}\n\n// --- Main Execution Logic ---\ntry {\n  const userInputCoin = parsedContent.coin;\n  const searchTerm = userInputCoin.toLowerCase();\n  let matchedCoin = null;\n\n  // --- TIER 1: Search the Top 200 Coins ---\n  const topCoinsUrl = `https://api.coingecko.com/api/v3/coins/markets`;\n  const topCoins = await this.helpers.httpRequest({\n    method: 'GET',\n    url: topCoinsUrl,\n    qs: {\n      vs_currency: 'usd',\n      order: 'market_cap_desc',\n      per_page: 250,\n      page: 1,\n      x_cg_demo_api_key: COINGECKO_API_KEY\n    },\n    json: true\n  });\n\n  if (!Array.isArray(topCoins) || topCoins.length === 0) {\n    throw new Error(\"Could not fetch top coins. Please double-check your API Key is correct.\");\n  }\n  \n  matchedCoin = topCoins.find(c => c.symbol.toLowerCase() === searchTerm || c.name.toLowerCase() === searchTerm || c.id.toLowerCase() === searchTerm);\n  \n  // --- TIER 2: Full Search (if not found in top 200) ---\n  if (!matchedCoin) {\n    const allCoinsUrl = `https://api.coingecko.com/api/v3/coins/list`;\n    const allCoins = await this.helpers.httpRequest({\n        method: 'GET',\n        url: allCoinsUrl,\n        qs: { x_cg_demo_api_key: COINGECKO_API_KEY },\n        json: true\n    });\n    if (!Array.isArray(allCoins) || allCoins.length === 0) throw new Error(\"Could not fetch full coin list.\");\n    let found = allCoins.find(c => c.id === searchTerm) || allCoins.find(c => c.symbol === searchTerm) || allCoins.find(c => c.name.toLowerCase() === searchTerm);\n    if (found) matchedCoin = { id: found.id, symbol: found.symbol, name: found.name };\n  }\n\n  if (!matchedCoin) {\n    return [{ json: { error: `Sorry, I couldn't find a cryptocurrency called \"${userInputCoin}\".`, originalMessage: parsedContent.originalMessage } }];\n  }\n  \n  const coinGeckoId = matchedCoin.id;\n  let price;\n  let priceDate = 'Today';\n\n  // --- Date-Aware Price Fetching ---\n  if (parsedContent.date) {\n    // HISTORICAL\n    priceDate = parsedContent.date;\n    const [year, month, day] = priceDate.split('-');\n    const formattedDate = `${day}-${month}-${year}`;\n    const historyUrl = `https://api.coingecko.com/api/v3/coins/${coinGeckoId}/history`;\n    const historyResponse = await this.helpers.httpRequest({\n        method: 'GET',\n        url: historyUrl,\n        qs: {\n            date: formattedDate,\n            x_cg_demo_api_key: COINGECKO_API_KEY\n        },\n        json: true\n    });\n    if (!historyResponse?.market_data?.current_price) {\n      return [{ json: { error: `Could not find price data for \"${matchedCoin.name}\" on ${priceDate}.`, originalMessage: parsedContent.originalMessage } }];\n    }\n    price = historyResponse.market_data.current_price.usd;\n  } else {\n    // CURRENT\n    const priceUrl = `https://api.coingecko.com/api/v3/simple/price`;\n    const priceResponse = await this.helpers.httpRequest({\n        method: 'GET',\n        url: priceUrl,\n        qs: {\n            ids: coinGeckoId,\n            vs_currencies: 'usd',\n            x_cg_demo_api_key: COINGECKO_API_KEY\n        },\n        json: true\n    });\n    if (!priceResponse[coinGeckoId]?.usd) {\n      return [{ json: { error: `Could not fetch the current price for \"${matchedCoin.name}\".`, originalMessage: parsedContent.originalMessage } }];\n    }\n    price = priceResponse[coinGeckoId].usd;\n  }\n\n  if (price === undefined || price === null) {\n    return [{ json: { error: `The price for \"${matchedCoin.name}\" seems to be unavailable.`, originalMessage: parsedContent.originalMessage } }];\n  }\n\n  // --- FINAL SUCCESSFUL OUTPUT ---\n  return [{\n    json: {\n      userInput: userInputCoin,\n      matchedCoinGeckoData: { id: matchedCoin.id, symbol: matchedCoin.symbol.toUpperCase(), name: matchedCoin.name },\n      price_date: priceDate,\n      price_usd: price,\n      originalMessage: parsedContent.originalMessage\n    }\n  }];\n} catch (error) {\n  console.error(\"An unexpected error occurred:\", error);\n  return [{ json: { error: \"An unexpected error occurred during the process.\", details: error.message } }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2352,
+        240
+      ],
+      "id": "5af1ffce-2edc-4d1a-bdb3-ba48ec021123",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.fireworks.ai/inference/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"accounts/sentientfoundation-serverless/models/dobby-mini-unhinged-plus-llama-3-1-8b\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a witty cryptocurrency assistant with a dry sense of humor. Your task is to take a simple 'Data:' string and turn it into a single, natural language sentence for a Telegram user. Do NOT return JSON. Only return the final sentence.\\n\\nExamples:\\n- Input: Data: Coin=Ethereum (ETH), Date=2025-08-28, Price=4500.15\\n  Output: Firing up the time machine! On 2025-08-28, Ethereum (ETH) was going for $4,500.15.\\n\\n- Input: Data: Coin=Bitcoin (BTC), Date=Today, Price=112031.00\\n  Output: Fresh off the press! The current price for Bitcoin (BTC) is a whopping $112,031.00.\\n\\n- Input: Data: Error=Price data not found...\\n  Output: Oof, my crystal ball seems to be foggy on that. I couldn't find any price data for that date.\\n\\nBe friendly but not overly robotic. Return ONLY the final sentence.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Data: Coin={{ $('Code1').first().json.matchedCoinGeckoData.name }} ({{ $('Codee1').first().json.matchedCoinGeckoData.symbol }}), Date={{ $('Code1').first().json.price_date }}, Price={{ parseFloat($('Code1').first().json.price_usd).toFixed(2) }}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2704,
+        240
+      ],
+      "id": "15ca610b-63c6-4393-bc2f-5f17cfdcb664",
+      "name": "HTTP Request",
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append or update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
